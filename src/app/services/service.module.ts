@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import {SettingsService, SharedService, SidebarService} from './service.index';
 import { UsuarioService } from './usuario/usuario.service';
 import { HttpClientModule } from '@angular/common/http';
+import { SubirArchivoService } from './subir-archivo/subir-archivo.service';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
     SharedService,
     SidebarService,
     UsuarioService,
+    SubirArchivoService
   ],
   declarations: []
 })

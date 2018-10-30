@@ -4,6 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { URL_SERVICIOS } from 'src/app/config/config';
 import { map } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { SubirArchivoService } from '../subir-archivo/subir-archivo.service';
+import { TouchSequence } from 'selenium-webdriver';
+import { shallowEqualArrays } from '@angular/router/src/utils/collection';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +16,7 @@ export class UsuarioService {
   usuario: Usuario;
   token: string;
 
-  constructor(public http: HttpClient, public router: Router) {
+  constructor(public http: HttpClient, public router: Router, public _subirArchivoService: SubirArchivoService) {
     this.cargarStorage();
   }
 
@@ -34,7 +37,7 @@ export class UsuarioService {
   guardarStorage(id: string, token: string, usuario: Usuario){
     localStorage.setItem('id', id);
     localStorage.setItem('token', token);
-    localStorage.setItem('id', JSON.stringify(usuario));
+    localStorage.setItem('usuario', JSON.stringify(usuario));
     this.usuario = usuario;
     this.token = token;
   }
@@ -82,6 +85,29 @@ export class UsuarioService {
       swal('Usuario creado', usuario.email, 'success');
       return resp.usuario;
     }))
+  }
+
+  actualizarUsuario(usuario: Usuario){
+    let url = URL_SERVICIOS + '/usuario/' + usuario._id;
+    url += '?token=' + this.token;
+    return this.http.put(url, usuario).pipe(map( (resp:any) => {
+      let usuarioDB: Usuario = resp;
+      this.guardarStorage(usuarioDB._id, this.token, usuarioDB);
+      swal('Usuario Actualizado', usuario.nombre, 'success');
+      return true;
+    }))
+  }
+
+  cambiarImagen(archivo: File, id: string){
+    this._subirArchivoService.subirArchivo(archivo, 'usuarios', id)
+    .then( (resp: any) => {
+        this.usuario.img = resp.usuarioActualizado.img;
+        swal('Imagen actualizada', this.usuario.nombre, 'success');
+        this.guardarStorage(id, this.token, this.usuario);
+      })
+    .catch( resp => {
+        console.log(resp);
+    });
   }
   
 }
